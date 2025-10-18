@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clínica ETEMFL- Acessos</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            
+            /* Configurações para remover barras de rolagem e garantir a largura total */
+            overflow: hidden; 
+            margin: 0; 
+            padding-top: 50px; 
+            
+            /* Configurações de layout Flexbox para o rodapé */
+            min-height: 100vh; 
+            display: flex;
+            flex-direction: column;
+            width: 100vw; 
+            box-sizing: border-box; 
+        }
+
+        .content {
+            flex-grow: 1; 
+            /* Responsividade do conteúdo principal */
+            padding: 0 5%; 
+            max-width: 600px; 
+            margin: 0 auto; 
+        }
+
+        .btn { 
+            display: block; 
+            margin: 20px auto; 
+            padding: 15px 30px; 
+            background: #28a745; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 5px;
+            
+            /* Responsividade do botão */
+            width: 80%;
+            max-width: 300px; 
+        }
+        
+        /* ESTILO DO RODAPÉ (BANNER VERDE) */
+        footer {
+            margin-top: auto; 
+            padding: 15px;
+            background: #28a745; /* Cor verde dos botões */
+            color: white; 
+            font-size: 0.9em;
+            width: 100%; 
+            box-sizing: border-box; 
+
+            /* Layout Horizontal e Centralizado com Flexbox */
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+        }
+        
+        /* Quadrado Branco para a Logo (Fundo Branco) */
+        .white-box {
+            background-color: white;
+            padding: 5px; 
+            border-radius: 5px;
+            margin-right: 15px; 
+            
+            height: 60px; 
+            width: 60px; 
+            
+            /* Centralização da logo no quadrado */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Estilos da logomarca dentro do rodapé */
+        .logo-container {
+            margin: 0;
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-container img {
+            max-width: 55px; /* Tamanho da logo dentro do quadrado de 60px */
+            height: auto;
+            margin: 0; 
+            filter: none; 
+        }
+        
+        /* Remove a margem padrão do parágrafo <p> para máxima proximidade */
+        footer p {
+            margin: 0; 
+        }
+
+        /* MEDIA QUERY: Ajustes para telas muito pequenas (Smartphones) */
+        @media (max-width: 400px) {
+            .white-box {
+                height: 45px; 
+                width: 45px;
+                margin-right: 10px;
+            }
+            .logo-container img {
+                max-width: 40px; 
+            }
+            footer {
+                padding: 10px;
+                font-size: 0.75em; 
+            }
+        }
+    </style>
+    </head>
+<body>
+    <div class="content">
+        <h1>Clínica ETEMFL</h1>
+        <p>Escolha sua área de acesso:</p>
+        
+        <a href="gestor/" class="btn">Acesso Gestor</a>
+        <a href="usuario/" class="btn">Área do Usuário</a>
+    </div>
+    
+    <footer>
+        <div class="white-box">
+            <div class="logo-container">
+                <img src="Logo Nosyre Tech.jpg" alt="Logo Nosyre Tech">
+            </div>
+        </div>
+        
+        <p>Copyright &copy; 2025 Nosyre Tech</p>
+    </footer>
+    </body>
+</html>
