@@ -165,7 +165,10 @@
         <form id="formEspecialista">
           <input type="hidden" id="espId" value="" />
           <div class="form-group"><label>Nome do especialista</label><input id="espNome" type="text" placeholder="Ex: Dra. Maria Silva" required /></div>
-          <div class="form-group"><label>Especialidade</label><input id="espEspecialidade" type="text" placeholder="Ex: Dentista, Clínico Geral, etc." required /></div>
+          <div style="display:flex;gap:12px;">
+            <div style="flex:1" class="form-group"><label>Especialidade</label><input id="espEspecialidade" type="text" placeholder="Ex: Dentista, Clínico Geral, etc." required /></div>
+            <div style="flex:1" class="form-group"><label>CRM</label><input id="espCRM" type="text" placeholder="Ex: 12345" /></div>
+          </div>
           <div class="form-group"><label>Turno</label>
             <div style="display:flex;gap:12px;">
               <label><input type="radio" name="espTurno" value="manhã" checked /> Manhã</label>
@@ -603,7 +606,7 @@
         card.innerHTML = `<div style="display:flex;justify-content:space-between">
           <div>
             <h3>${sp.nome}</h3>
-            <div class="small">Especialidade: <strong>${sp.especialidade}</strong></div>
+            <div class="small">Especialidade: <strong>${sp.especialidade}</strong>${sp.crm ? ' • CRM: <strong>' + sp.crm + '</strong>' : ''}</div>
             <div class="small">Turno: <strong>${sp.turno}</strong> • Dias: <strong>${dias}</strong></div>
           </div>
           <div style="text-align:right">
@@ -1002,6 +1005,7 @@
       const id = document.getElementById('espId').value;
       const nome = document.getElementById('espNome').value.trim();
       const especialidade = document.getElementById('espEspecialidade').value.trim();
+      const crm = document.getElementById('espCRM').value.trim();
       const turno = document.querySelector('input[name="espTurno"]:checked').value;
       const vagasManha = parseInt(document.getElementById('espVagasManha').value) || 0;
       const vagasTarde = parseInt(document.getElementById('espVagasTarde').value) || 0;
@@ -1012,12 +1016,12 @@
         const idx = specs.findIndex(s => s.id === id);
         if(idx >= 0){
           const before = Object.assign({}, specs[idx]);
-          specs[idx].nome = nome; specs[idx].especialidade = especialidade; specs[idx].turno = turno;
+          specs[idx].nome = nome; specs[idx].especialidade = especialidade; specs[idx].crm = crm; specs[idx].turno = turno;
           specs[idx].vagasManha = vagasManha; specs[idx].vagasTarde = vagasTarde; specs[idx].dias = dias; specs[idx].ativo = true;
           write(LS.ESP, specs); addHistory('especialista','Gestor',`Especialista editado: ${nome}`, { before, after: specs[idx] });
         }
       } else {
-        const novo = { id: genId(), nome, especialidade, turno, vagasManha, vagasTarde, dias, ativo:true };
+        const novo = { id: genId(), nome, especialidade, crm, turno, vagasManha, vagasTarde, dias, ativo:true };
         specs.push(novo); write(LS.ESP, specs); addHistory('especialista','Gestor',`Especialista incluído: ${nome}`, { especialista: novo });
       }
 
@@ -1030,6 +1034,7 @@
       if(!sp) return alert('Especialista não encontrado.');
       document.getElementById('espId').value = sp.id; document.getElementById('espNome').value = sp.nome; 
       document.getElementById('espEspecialidade').value = sp.especialidade;
+      document.getElementById('espCRM').value = sp.crm || '';
       document.querySelectorAll('input[name="espTurno"]').forEach(r => r.checked = (r.value === sp.turno));
       document.getElementById('espVagasManha').value = sp.vagasManha || 0; document.getElementById('espVagasTarde').value = sp.vagasTarde || 0;
       document.querySelectorAll('.dayChk').forEach(ch => ch.checked = (sp.dias || []).includes(Number(ch.value)));
