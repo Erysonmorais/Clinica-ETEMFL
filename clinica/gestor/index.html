@@ -166,8 +166,21 @@
           <input type="hidden" id="espId" value="" />
           <div class="form-group"><label>Nome do especialista</label><input id="espNome" type="text" placeholder="Ex: Dra. Maria Silva" required /></div>
           <div style="display:flex;gap:12px;">
-            <div style="flex:1" class="form-group"><label>Especialidade</label><input id="espEspecialidade" type="text" placeholder="Ex: Dentista, Clínico Geral, etc." required /></div>
-            <div style="flex:1" class="form-group"><label>CRM</label><input id="espCRM" type="text" placeholder="Ex: 12345" /></div>
+            <div style="flex:1" class="form-group"><label>Especialidade</label>
+              <select id="espEspecialidade" required>
+                <option value="">-- Selecione --</option>
+                <option value="Médico">Médico</option>
+                <option value="Dentista">Dentista</option>
+                <option value="Psicólogo">Psicólogo</option>
+                <option value="Nutricionista">Nutricionista</option>
+                <option value="Fonoaudiólogo">Fonoaudiólogo</option>
+                <option value="Médico Veterinário">Médico Veterinário</option>
+                <option value="Fisioterapeuta">Fisioterapeuta</option>
+                <option value="Terapeuta Ocupacional">Terapeuta Ocupacional</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+            <div style="flex:1" class="form-group"><label id="conselhoLabel">Conselho Regional</label><input id="espConselho" type="text" placeholder="Ex: 12345" /></div>
           </div>
           <div class="form-group"><label>Turno</label>
             <div style="display:flex;gap:12px;">
@@ -606,7 +619,7 @@
         card.innerHTML = `<div style="display:flex;justify-content:space-between">
           <div>
             <h3>${sp.nome}</h3>
-            <div class="small">Especialidade: <strong>${sp.especialidade}</strong>${sp.crm ? ' • CRM: <strong>' + sp.crm + '</strong>' : ''}</div>
+            <div class="small">Especialidade: <strong>${sp.especialidade}</strong>${sp.conselho ? ' • Conselho: <strong>' + sp.conselho + '</strong>' : ''}</div>
             <div class="small">Turno: <strong>${sp.turno}</strong> • Dias: <strong>${dias}</strong></div>
           </div>
           <div style="text-align:right">
@@ -1005,7 +1018,7 @@
       const id = document.getElementById('espId').value;
       const nome = document.getElementById('espNome').value.trim();
       const especialidade = document.getElementById('espEspecialidade').value.trim();
-      const crm = document.getElementById('espCRM').value.trim();
+      const conselho = document.getElementById('espConselho').value.trim();
       const turno = document.querySelector('input[name="espTurno"]:checked').value;
       const vagasManha = parseInt(document.getElementById('espVagasManha').value) || 0;
       const vagasTarde = parseInt(document.getElementById('espVagasTarde').value) || 0;
@@ -1016,12 +1029,12 @@
         const idx = specs.findIndex(s => s.id === id);
         if(idx >= 0){
           const before = Object.assign({}, specs[idx]);
-          specs[idx].nome = nome; specs[idx].especialidade = especialidade; specs[idx].crm = crm; specs[idx].turno = turno;
+          specs[idx].nome = nome; specs[idx].especialidade = especialidade; specs[idx].conselho = conselho; specs[idx].turno = turno;
           specs[idx].vagasManha = vagasManha; specs[idx].vagasTarde = vagasTarde; specs[idx].dias = dias; specs[idx].ativo = true;
           write(LS.ESP, specs); addHistory('especialista','Gestor',`Especialista editado: ${nome}`, { before, after: specs[idx] });
         }
       } else {
-        const novo = { id: genId(), nome, especialidade, crm, turno, vagasManha, vagasTarde, dias, ativo:true };
+        const novo = { id: genId(), nome, especialidade, conselho, turno, vagasManha, vagasTarde, dias, ativo:true };
         specs.push(novo); write(LS.ESP, specs); addHistory('especialista','Gestor',`Especialista incluído: ${nome}`, { especialista: novo });
       }
 
@@ -1034,7 +1047,7 @@
       if(!sp) return alert('Especialista não encontrado.');
       document.getElementById('espId').value = sp.id; document.getElementById('espNome').value = sp.nome; 
       document.getElementById('espEspecialidade').value = sp.especialidade;
-      document.getElementById('espCRM').value = sp.crm || '';
+      document.getElementById('espConselho').value = sp.conselho || '';
       document.querySelectorAll('input[name="espTurno"]').forEach(r => r.checked = (r.value === sp.turno));
       document.getElementById('espVagasManha').value = sp.vagasManha || 0; document.getElementById('espVagasTarde').value = sp.vagasTarde || 0;
       document.querySelectorAll('.dayChk').forEach(ch => ch.checked = (sp.dias || []).includes(Number(ch.value)));
@@ -1255,6 +1268,25 @@
     document.getElementById('btnLimparHist').addEventListener('click', ()=> { document.getElementById('histTipo').value=''; 
     document.getElementById('histDataInicio').value=''; document.getElementById('histDataFim').value=''; renderHistoricoList(); });
     function boot(){ initDefaultsIfEmpty(); renderClinicContact(); populateBairros(); applyMasks(); showPage('dashboard'); }
+    
+    // Atualizar label do conselho conforme especialidade
+    document.getElementById('espEspecialidade').addEventListener('change', (e) => {
+      const label = document.getElementById('conselhoLabel');
+      const especialidade = e.target.value;
+      const conselhos = {
+        'Médico': 'CRM (Conselho Regional de Medicina)',
+        'Dentista': 'CRO (Conselho Regional de Odontologia)',
+        'Psicólogo': 'CRP (Conselho Regional de Psicologia)',
+        'Nutricionista': 'CRN (Conselho Regional de Nutrição)',
+        'Fonoaudiólogo': 'Crefono (Conselho Regional de Fonoaudiologia)',
+        'Médico Veterinário': 'CRMV (Conselho Regional de Medicina Veterinária)',
+        'Fisioterapeuta': 'Crefito (Conselho Regional de Fisioterapia)',
+        'Terapeuta Ocupacional': 'Crefito (Conselho Regional de Terapia Ocupacional)',
+        'Outro': 'Conselho Regional'
+      };
+      label.textContent = conselhos[especialidade] || 'Conselho Regional';
+    });
+    
     window.addEventListener('DOMContentLoaded', boot);
     window._app = { read, write, LS, genId, generateSlots, findEarliestSlotNextWeek, getAvailabilityForSpecialistOnDate };
 
