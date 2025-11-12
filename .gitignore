@@ -1,0 +1,32 @@
+# Ambiente e dependências
+node_modules/
+npm-debug.log
+.DS_Store
+*.log
+
+# Variáveis de ambiente
+.env.local
+.env.*.local
+
+# Caches
+.cache/
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema
+Thumbs.db
+.env
+
+# Docker
+.dockerignore
+
+# Local database files
+banco.db/
+*.db
+*.sqlite
+*.sqlite3
