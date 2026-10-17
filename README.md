@@ -15,9 +15,11 @@ backend/
     routes/api.js          Rotas, validação e regras da aplicação
 database/
   schema.sql               Esquema relacional idempotente
-  seed.sql                 Médicos de demonstração sem dados pessoais
+  seed.sql                 Configuração institucional, sem pacientes ou médicos
 gestor/                    Portal administrativo e PWA
 usuario/                   Portal do paciente e PWA
+scripts/build-netlify.js   Gera a publicação estática com os dois portais
+netlify.toml               Configuração de build e diretório público da Netlify
 Dockerfile
 docker-compose.yml
 ```
@@ -36,7 +38,7 @@ CPF e Cartão SUS são dados pessoais: não use dados reais em demonstrações, 
 
 1. Crie um banco PostgreSQL e um usuário dedicado, com senha forte.
 2. Copie `.env.example` para `.env`. Configure `DATABASE_URL`, `GESTOR_BOOTSTRAP_EMAIL` e `GESTOR_BOOTSTRAP_PASSWORD` (senha aleatória com pelo menos 16 caracteres).
-3. Execute `npm install` e depois `npm start`. Na inicialização, a aplicação aplica `database/schema.sql`, que é idempotente. Para carregar os especialistas fictícios, execute `database/seed.sql` separadamente; pacientes reais nunca são incluídos no seed.
+3. Execute `npm install` e depois `npm start`. Na inicialização, a aplicação aplica `database/schema.sql`, que é idempotente. O arquivo `database/seed.sql` é mantido sem médicos de exemplo e sem pacientes, para não expor dados fictícios ou pessoais.
 4. Acesse `http://localhost:3001/usuario/`, `http://localhost:3001/gestor/` e `http://localhost:3001/api-docs/`.
 
 O primeiro início cria a conta de gestor informada no ambiente, somente se ainda não houver gestor cadastrado. Guarde as credenciais fora do código. Para PostgreSQL gerenciado com TLS, configure `PGSSL=true`.
@@ -54,6 +56,18 @@ O primeiro início cria a conta de gestor informada no ambiente, somente se aind
 O volume de dados é `etemfl-data`. Os arquivos SQL de inicialização são aplicados automaticamente apenas quando o volume do PostgreSQL é criado pela primeira vez. Para atualizar um banco já existente, faça backup e aplique o `database/schema.sql` revisado. **Não remova o volume para atualizar o esquema**: isso apaga os dados.
 
 No Windows, `.\scripts\deploy.ps1` valida os parâmetros obrigatórios e constrói/inicia os serviços.
+
+## Publicação dos portais na Netlify
+
+O projeto `clinica-etemfl` existente está conectado ao repositório GitHub `Erysonmorais/Clinica-ETEMFL`. A configuração da Netlify apontava para uma pasta `clinica/` que não existe; `netlify.toml` corrige o build para gerar e publicar apenas `dist/`, contendo a página inicial e os dois portais. O backend, o esquema SQL e outros arquivos internos não são enviados ao site estático.
+
+Depois que as alterações forem enviadas para `main`, a Netlify publica automaticamente:
+
+- `https://clinica-etemfl.netlify.app/` — entrada com acesso aos dois portais.
+- `https://clinica-etemfl.netlify.app/usuario/` — portal do paciente.
+- `https://clinica-etemfl.netlify.app/gestor/` — portal do gestor.
+
+**Limite de funcionamento atual:** Netlify hospeda os arquivos estáticos, mas não executa este servidor Express/WebSocket de forma persistente nem fornece PostgreSQL. A API precisa permanecer em um serviço Node.js e ser vinculada a um banco PostgreSQL acessível. O serviço Render verificado está falhando ao conectar ao banco; até que API, banco, autenticação entre domínios e comunicação em tempo real sejam validados, os portais podem abrir, mas não se deve cadastrar pacientes nem considerar as gravações funcionais. Não publique dados reais de saúde em uma demonstração.
 
 ## Publicação de demonstração gratuita no Render
 
@@ -82,4 +96,4 @@ Os caches locais do gestor usam chaves próprias, separadas das chaves do pacien
 
 ## Dados de demonstração e migração
 
-`database/seed.sql` contém apenas dois especialistas fictícios. Cadastros de pacientes legados mantidos no navegador podem ser migrados pelo próprio paciente ao entrar com a senha antiga no mesmo navegador, ou pelo gestor na tela de pacientes informando uma nova senha inicial. Confirme cada migração antes de apagar qualquer cópia local.
+`database/seed.sql` não contém especialistas de exemplo nem pacientes. Cadastros de pacientes legados mantidos no navegador podem ser migrados pelo próprio paciente ao entrar com a senha antiga no mesmo navegador, ou pelo gestor na tela de pacientes informando uma nova senha inicial. Confirme cada migração antes de apagar qualquer cópia local.
