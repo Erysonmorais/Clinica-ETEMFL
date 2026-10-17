@@ -1,0 +1,14 @@
+{
+  "name": "Clínica ETEMFL - Paciente",
+  "short_name": "ETEMFL",
+  "description": "Agendamentos e comunicados da Clínica ETEMFL",
+  "start_url": "/usuario/",
+  "scope": "/usuario/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#28a745",
+  "icons": [
+    { "src": "/usuario/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/usuario/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

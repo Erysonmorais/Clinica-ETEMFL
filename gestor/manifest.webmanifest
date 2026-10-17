@@ -1,0 +1,14 @@
+{
+  "name": "Clínica ETEMFL - Gestão",
+  "short_name": "ETEMFL Gestão",
+  "description": "Portal administrativo da Clínica ETEMFL",
+  "start_url": "/gestor/",
+  "scope": "/gestor/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#155724",
+  "icons": [
+    { "src": "/gestor/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/gestor/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

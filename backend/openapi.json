@@ -1,0 +1,223 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API Clínica ETEMFL",
+    "version": "1.0.0",
+    "description": "API REST da clínica. Endpoints administrativos e dados pessoais exigem sessão autenticada por cookie HttpOnly."
+  },
+  "servers": [{ "url": "/" }],
+  "tags": [
+    { "name": "Autenticação" },
+    { "name": "Clínica" },
+    { "name": "Médicos" },
+    { "name": "Pacientes" },
+    { "name": "Agendamentos" },
+    { "name": "Comunicados" },
+    { "name": "Notificações" },
+    { "name": "Auditoria" }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": { "tags": ["Clínica"], "summary": "Verificar API e banco", "responses": { "200": { "description": "Conexão disponível" } } }
+    },
+    "/api/auth/paciente/cadastro": {
+      "post": {
+        "tags": ["Autenticação"], "summary": "Cadastrar paciente e iniciar sessão",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CadastroPaciente" } } } },
+        "responses": { "201": { "description": "Paciente cadastrado" }, "409": { "description": "CPF ou Cartão SUS já cadastrado" } }
+      }
+    },
+    "/api/auth/paciente/login": {
+      "post": {
+        "tags": ["Autenticação"], "summary": "Entrar como paciente",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["cpf", "cartao_sus", "senha"],
+                "properties": {
+                  "cpf": { "type": "string" },
+                  "cartao_sus": { "type": "string" },
+                  "senha": { "type": "string", "format": "password" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Sessão iniciada; cookie HttpOnly emitido" }, "401": { "description": "Credenciais inválidas" }, "429": { "description": "Limite de tentativas excedido" } }
+      }
+    },
+    "/api/auth/gestor/login": {
+      "post": {
+        "tags": ["Autenticação"], "summary": "Entrar como gestor",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "senha"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "senha": { "type": "string", "format": "password" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Sessão iniciada; cookie HttpOnly emitido" }, "401": { "description": "Credenciais inválidas" }, "429": { "description": "Limite de tentativas excedido" } }
+      }
+    },
+    "/api/auth/me": {
+      "get": { "tags": ["Autenticação"], "summary": "Consultar sessão atual; envie X-ETEMFL-Portal para selecionar paciente ou gestor", "security": [{ "managerSessionCookie": [] }, { "patientSessionCookie": [] }], "responses": { "200": { "description": "Identidade autenticada" }, "401": { "description": "Sem sessão válida" } } }
+    },
+    "/api/auth/logout": {
+      "post": { "tags": ["Autenticação"], "summary": "Encerrar sessão do portal indicado por X-ETEMFL-Portal", "security": [{ "managerSessionCookie": [] }, { "patientSessionCookie": [] }], "responses": { "200": { "description": "Sessão encerrada" } } }
+    },
+    "/api/gestores": {
+      "get": { "tags": ["Clínica"], "summary": "Consultar dados institucionais públicos", "responses": { "200": { "description": "Configuração da clínica sem segredos" } } },
+      "post": {
+        "tags": ["Clínica"],
+        "summary": "Atualizar configuração (gestor)",
+        "security": [{ "managerSessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome_clinica": { "type": "string" },
+                  "endereco": { "type": "string" },
+                  "telefone": { "type": "string" },
+                  "senha_mestre": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Configuração atualizada" },
+          "401": { "description": "Sessão ausente" },
+          "403": { "description": "Apenas gestor" }
+        }
+      }
+    },
+    "/api/medicos": {
+      "get": { "tags": ["Médicos"], "summary": "Listar especialistas ativos", "responses": { "200": { "description": "Especialistas" } } },
+      "post": { "tags": ["Médicos"], "summary": "Cadastrar especialista (gestor)", "security": [{ "managerSessionCookie": [] }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Medico" } } } }, "responses": { "201": { "description": "Especialista cadastrado" }, "401": { "description": "Sessão ausente" }, "403": { "description": "Apenas gestor" } } }
+    },
+    "/api/medicos/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/id" }],
+      "put": { "tags": ["Médicos"], "summary": "Atualizar especialista (gestor)", "security": [{ "managerSessionCookie": [] }], "responses": { "200": { "description": "Especialista atualizado" } } },
+      "delete": { "tags": ["Médicos"], "summary": "Desativar especialista (gestor)", "security": [{ "managerSessionCookie": [] }], "responses": { "200": { "description": "Especialista desativado" } } }
+    },
+    "/api/pacientes": {
+      "get": { "tags": ["Pacientes"], "summary": "Listar pacientes (gestor) ou consultar o próprio perfil", "security": [{ "managerSessionCookie": [] }, { "patientSessionCookie": [] }], "responses": { "200": { "description": "Pacientes autorizados" }, "401": { "description": "Sessão ausente" } } },
+      "post": { "tags": ["Pacientes"], "summary": "Cadastrar paciente pelo gestor", "security": [{ "managerSessionCookie": [] }], "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CadastroPaciente" } } } }, "responses": { "201": { "description": "Paciente cadastrado" }, "409": { "description": "CPF ou Cartão SUS duplicado" } } }
+    },
+    "/api/pacientes/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/id" }],
+      "put": { "tags": ["Pacientes"], "summary": "Atualizar paciente (gestor)", "security": [{ "managerSessionCookie": [] }], "responses": { "200": { "description": "Paciente atualizado" } } },
+      "delete": { "tags": ["Pacientes"], "summary": "Excluir paciente (gestor)", "security": [{ "managerSessionCookie": [] }], "responses": { "200": { "description": "Paciente excluído" } } }
+    },
+    "/api/agendamentos": {
+      "get": { "tags": ["Agendamentos"], "summary": "Listar agendamentos autorizados; aceita filtros cpf, cartao_sus, data_de, data_ate e status", "security": [{ "managerSessionCookie": [] }, { "patientSessionCookie": [] }], "responses": { "200": { "description": "Agendamentos autorizados" } } },
+      "post": { "tags": ["Agendamentos"], "summary": "Criar agendamento pelo gestor", "security": [{ "managerSessionCookie": [] }], "responses": { "201": { "description": "Agendamento criado" } } }
+    },
+    "/api/agendamentos/full": {
+      "post": {
+        "tags": ["Agendamentos"], "summary": "Criar solicitação de consulta com paciente existente ou paciente autenticado",
+        "security": [{ "managerSessionCookie": [] }, { "patientSessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["vaga"],
+                "properties": {
+                  "paciente": { "type": "object", "properties": { "id": { "type": "integer" } } },
+                  "vaga": {
+                    "type": "object",
+                    "required": ["data", "hora_inicio"],
+                    "properties": {
+                      "medico_db_id": { "type": "integer" },
+                      "data": { "type": "string", "format": "date" },
+                      "hora_inicio": { "type": "string", "format": "time" }
+                    }
+                  },
+                  "idempotency_key": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Solicitação criada" }, "200": { "description": "Solicitação idempotente já existente" }, "409": { "description": "Vaga indisponível" } }
+      }
+    },
+    "/api/agendamentos/{id}": {
+      "parameters": [{ "$ref": "#/components/parameters/id" }],
+      "put": { "tags": ["Agendamentos"], "summary": "Confirmar ou cancelar agendamento; paciente só cancela o próprio", "security": [{ "managerSessionCookie": [] }, { "patientSessionCookie": [] }], "responses": { "200": { "description": "Agendamento atualizado" } } },
+      "delete": { "tags": ["Agendamentos"], "summary": "Excluir agendamento (gestor)", "security": [{ "managerSessionCookie": [] }], "responses": { "200": { "description": "Agendamento excluído" } } }
+    },
+    "/api/comunicados": {
+      "get": { "tags": ["Comunicados"], "summary": "Listar comunicados visíveis para a sessão", "security": [{ "managerSessionCookie": [] }, { "patientSessionCookie": [] }], "responses": { "200": { "description": "Comunicados filtrados por setor" } } },
+      "post": { "tags": ["Comunicados"], "summary": "Criar comunicado (gestor) e notificar destinatários", "security": [{ "managerSessionCookie": [] }], "responses": { "201": { "description": "Comunicado salvo e notificações persistidas" } } }
+    },
+    "/api/notificacoes": {
+      "get": { "tags": ["Notificações"], "summary": "Listar notificações do paciente autenticado", "security": [{ "patientSessionCookie": [] }], "responses": { "200": { "description": "Notificações" } } }
+    },
+    "/api/notificacoes/{id}/lida": {
+      "parameters": [{ "$ref": "#/components/parameters/id" }],
+      "put": { "tags": ["Notificações"], "summary": "Marcar notificação própria como lida", "security": [{ "patientSessionCookie": [] }], "responses": { "200": { "description": "Notificação marcada" } } }
+    },
+    "/api/auditoria": {
+      "get": { "tags": ["Auditoria"], "summary": "Consultar eventos auditáveis (gestor)", "security": [{ "managerSessionCookie": [] }], "responses": { "200": { "description": "Eventos recentes" } } },
+      "post": { "tags": ["Auditoria"], "summary": "Registrar evento administrativo", "security": [{ "managerSessionCookie": [] }], "responses": { "201": { "description": "Evento persistido" } } }
+    },
+    "/api/reset": {
+      "post": { "tags": ["Clínica"], "summary": "Reset geral protegido pela Senha Mestre (gestor)", "security": [{ "managerSessionCookie": [] }], "responses": { "200": { "description": "Dados removidos" }, "403": { "description": "Senha Mestre incorreta" } } }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "managerSessionCookie": { "type": "apiKey", "in": "cookie", "name": "etemfl_manager_session", "description": "Cookie HttpOnly de sessão do gestor; inclua X-ETEMFL-Portal: gestor nas requisições." },
+      "patientSessionCookie": { "type": "apiKey", "in": "cookie", "name": "etemfl_patient_session", "description": "Cookie HttpOnly de sessão do paciente; inclua X-ETEMFL-Portal: paciente nas requisições." }
+    },
+    "parameters": {
+      "id": { "name": "id", "in": "path", "required": true, "schema": { "type": "integer", "format": "int64" } }
+    },
+    "schemas": {
+      "CadastroPaciente": {
+        "type": "object",
+        "required": ["nome", "data_nascimento", "cpf", "cartao_sus", "senha"],
+        "properties": {
+          "nome": { "type": "string", "minLength": 1 },
+          "data_nascimento": { "type": "string", "format": "date" },
+          "cpf": { "type": "string", "pattern": "^\\d{11}$" },
+          "cartao_sus": { "type": "string", "pattern": "^\\d{15}$" },
+          "bairro": { "type": "string" },
+          "setor": { "type": "string", "pattern": "^[A-E][1-5]$" },
+          "senha": { "type": "string", "minLength": 8, "format": "password" }
+        }
+      },
+      "Medico": {
+        "type": "object",
+        "required": ["nome", "especialidade"],
+        "properties": {
+          "nome": { "type": "string" },
+          "especialidade": { "type": "string" },
+          "tipo_conselho": { "type": "string" },
+          "registro_profissional": { "type": "string" },
+          "turno": { "type": "string", "enum": ["manhã", "tarde", "ambos"] },
+          "vagas_manha": { "type": "integer", "minimum": 0 },
+          "vagas_tarde": { "type": "integer", "minimum": 0 },
+          "dias": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 6 } }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: etemfl
+      POSTGRES_USER: etemfl
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+    volumes:
+      - etemfl-data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U etemfl -d etemfl"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  app:
+    build: .
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgres://etemfl:${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}@db:5432/etemfl
+      PGSSL: "false"
+      GESTOR_BOOTSTRAP_EMAIL: ${GESTOR_BOOTSTRAP_EMAIL:-}
+      GESTOR_BOOTSTRAP_PASSWORD: ${GESTOR_BOOTSTRAP_PASSWORD:-}
+    ports:
+      - "3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  etemfl-data:
