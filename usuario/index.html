@@ -293,8 +293,8 @@
       font-size: 0.85rem;
       overflow-x: auto;
     }
-    .site-footer { position:fixed; right:0; bottom:24px; left:0; z-index:10; display:flex; align-items:center; justify-content:center; gap:8px; min-height:64px; padding:8px 12px; color:var(--dark); font-size:0.78rem; text-align:center; }
-    .site-footer img { width:44px; height:44px; object-fit:contain; }
+    .site-footer { display:flex; align-items:center; justify-content:space-between; gap:4px; margin-top:8px; color:#fff; font-size:0.62rem; line-height:1.2; }
+    .site-footer img { flex-shrink:0; width:44px; height:44px; object-fit:contain; }
   </style>
 </head>
 <body>
@@ -375,6 +375,10 @@
         <div class="clinic-line" id="clinicAddress"></div>
         <div class="clinic-line" id="clinicPhone"></div>
       </div>
+      <footer class="site-footer">
+        <span>© 2026 Clínica ETEMFL. Todos os direitos reservados.</span>
+        <img src="../Logo Nosyre Tech.png" alt="Nosyre Tech">
+      </footer>
     </aside>
 
     <main class="main">
@@ -1701,9 +1705,5 @@
     window.addEventListener('DOMContentLoaded', boot);
     window._userApp = { read, write, LS, genId, getCurrentUser, findAvailabilityForSpecialtyNextWeek };
   </script>
-  <footer class="site-footer">
-    <span>© 2026 Clínica ETEMFL. Todos os direitos reservados.</span>
-    <img src="../Logo Nosyre Tech.png" alt="Nosyre Tech">
-  </footer>
 </body>
 </html>
