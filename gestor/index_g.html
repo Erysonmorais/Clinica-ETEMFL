@@ -93,7 +93,7 @@
 
 </head>
 <body>
-  <div class="app">
+  <div class="app blocked">
     <aside class="sidebar" role="navigation" aria-label="Menu principal">
       <div class="logo">
         <div class="icon" id="brandIcon">G</div>
@@ -1805,16 +1805,6 @@
       populateBairros();
       applyMasks();
       showPage('dashboard');
-      try {
-        const response = await fetch('/api/auth/me', { credentials: 'same-origin' });
-        if (response.ok) {
-          const identity = await response.json();
-          if (identity.type === 'gestor') return await activateManager(identity);
-        }
-      } catch(error) {
-        console.error('Falha ao verificar a sessão administrativa:', error);
-      }
-      document.querySelector('.app').classList.add('blocked');
       document.getElementById('managerLogin').classList.add('show');
     }
     window.addEventListener('DOMContentLoaded', boot);
