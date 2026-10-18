@@ -435,7 +435,7 @@
       const method = String(options.method || (typeof resource === 'string' ? 'GET' : resource.method) || 'GET').toUpperCase();
       const publicGet = method === 'GET' &&
         ['/api/health', '/api/gestores', '/api/medicos'].includes(requestUrl.pathname);
-      const publicAuthRoute = ['/api/auth/gestor/login', '/api/auth/logout'].includes(requestUrl.pathname);
+      const publicAuthRoute = ['/api/auth/gestor/login', '/api/auth/me', '/api/auth/logout'].includes(requestUrl.pathname);
       if (response.status === 401 && requestUrl.origin === location.origin &&
           requestUrl.pathname.startsWith('/api/') && !publicGet && !publicAuthRoute) {
         requestManagerLogin();
@@ -1785,12 +1785,27 @@
       showPage(page);
     }
 
-    function requestManagerLogin(page){
+    async function requestManagerLogin(page){
       if (page) window._managerPendingPage = page;
-      document.querySelector('.app').classList.add('blocked');
-      document.getElementById('managerLoginError').textContent = '';
-      document.getElementById('managerLogin').classList.add('show');
-      document.getElementById('managerEmail').focus();
+      if (window._managerAccessCheck) return window._managerAccessCheck;
+      window._managerAccessCheck = (async () => {
+        try {
+          const response = await fetch('/api/auth/me', { credentials: 'same-origin' });
+          if (response.ok) {
+            const identity = await response.json();
+            if (identity.type === 'gestor') return await activateManager(identity);
+          }
+        } catch (error) {
+          console.error('Falha ao verificar a sessão administrativa:', error);
+        }
+        document.querySelector('.app').classList.add('blocked');
+        document.getElementById('managerLoginError').textContent = '';
+        document.getElementById('managerLogin').classList.add('show');
+        document.getElementById('managerEmail').focus();
+      })().finally(() => {
+        window._managerAccessCheck = null;
+      });
+      return window._managerAccessCheck;
     }
 
     document.getElementById('managerLoginForm').addEventListener('submit', async event=>{
