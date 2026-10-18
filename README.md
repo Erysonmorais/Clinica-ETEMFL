@@ -86,14 +86,12 @@ O arquivo `render.yaml` configura um serviço Docker gratuito e um PostgreSQL gr
 
 Cada portal tem seu próprio manifest, ícones e Service Worker. HTTPS é necessário para instalação PWA fora de `localhost`. O cache permite abrir a estrutura previamente carregada sem conexão; consultas e gravações só sincronizam quando a API voltar a estar disponível. As novas solicitações de agendamento são repetidas com chave idempotente. As sessões dos portais usam cookies distintos (`etemfl_patient_session` e `etemfl_manager_session`), e a conexão autenticada WebSocket recebe o portal em `/ws?portal=paciente` ou `/ws?portal=gestor`.
 
-A página inicial e as telas de acesso dos dois portais compartilham a identidade visual verde e dourada da Clínica ETEMFL; cada portal mantém seus próprios recursos e permissões.
-
 Os caches locais do gestor usam chaves próprias, separadas das chaves do paciente. Na primeira abertura após a atualização, os valores antigos do gestor são copiados para as novas chaves sem apagar os dados legados.
 
 ## Contas e segurança
 
 - Pacientes criam conta com CPF, Cartão SUS e senha (mínimo 8 caracteres); a senha é derivada com scrypt e o login cria cookie `HttpOnly`, `SameSite=Strict`.
-- O primeiro gestor é criado no bootstrap através das variáveis `GESTOR_BOOTSTRAP_EMAIL` e `GESTOR_BOOTSTRAP_PASSWORD`; o login usa esse e-mail e senha, sem credenciais padrão embutidas. O bootstrap só cria a conta quando ainda não existe gestor, portanto mudar a variável de ambiente depois não redefine a senha existente.
+- O primeiro gestor é criado no bootstrap através de variáveis de ambiente; não existe senha padrão embutida.
 - Rotas administrativas exigem sessão de gestor. O paciente só pode consultar o próprio perfil, agendamentos e notificações, cancelar os próprios agendamentos e ler comunicados do seu setor.
 - A Senha Mestre é enviada como SHA-256 e comparada no servidor para reset; o hash nunca é retornado ao portal.
 - Para uso real, mantenha o sistema em HTTPS, faça backups PostgreSQL testados, defina política de retenção e revise requisitos legais de dados de saúde, controle de acesso, auditoria e resposta a incidentes. Não exponha PostgreSQL à internet.

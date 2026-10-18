@@ -40,7 +40,7 @@
     h1{ color:var(--primary); font-size:1.2rem; margin-bottom:12px; }
     .form-group{ margin-bottom:10px; }
     label{ display:block; font-weight:700; margin-bottom:6px; }
-    input[type="text"], input[type="email"], input[type="date"], input[type="number"], input[type="password"], select, textarea { width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; font-size:0.95rem; }
+    input[type="text"], input[type="date"], input[type="number"], input[type="password"], select, textarea { width:100%; padding:10px; border:1px solid var(--border); border-radius:8px; font-size:0.95rem; }
     button{ cursor:pointer; border:none; border-radius:8px; padding:8px 12px; font-weight:700; }
     .btn { background:var(--primary); color:#fff; }
     .btn-muted { background:#f0f0f0; color:#222; }
@@ -65,26 +65,6 @@
     .contact-card * { color:#000 !important; }
     .contact-card .clinic-name{ font-weight:800; font-size:1rem; }
     .contact-card .clinic-line{ font-size:0.92rem; margin-top:6px; }
-    #managerLogin .manager-auth {
-      width:min(460px, 96vw);
-      padding:28px;
-      border:1px solid var(--border);
-      border-radius:16px;
-      box-shadow:0 16px 48px rgba(0,0,0,.18);
-    }
-    .manager-auth-brand { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
-    .manager-auth-mark {
-      width:60px; height:60px; flex:0 0 60px; display:grid; place-items:center;
-      border-radius:13px; background:var(--dark); color:var(--accent); font-size:1.7rem; font-weight:900;
-    }
-    .manager-auth-brand h2 { color:var(--dark); font-size:1.35rem; }
-    .manager-auth-brand p { margin-top:4px; }
-    .password-field { display:flex; gap:8px; align-items:stretch; }
-    .password-field input { min-width:0; flex:1; }
-    .password-toggle { flex:0 0 auto; border:1px solid var(--border); background:#fff; color:var(--dark); }
-    .auth-home-link { display:inline-block; margin-top:16px; color:var(--dark); font-weight:700; text-decoration:none; }
-    .auth-home-link:hover { text-decoration:underline; }
-    @media(max-width:480px) { #managerLogin .manager-auth { padding:22px; } }
     @media(max-width:900px){ .sidebar{ display:none } .grid{ grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); } }
 
     pre.history {
@@ -433,29 +413,15 @@
   </div>
 
   <div id="managerLogin" class="overlay show" role="dialog" aria-modal="true" aria-labelledby="managerLoginTitle">
-    <div class="modal small-modal manager-auth">
-      <div class="manager-auth-brand">
-        <div class="manager-auth-mark" aria-hidden="true">E</div>
-        <div>
-          <h2 id="managerLoginTitle">Clínica ETEMFL</h2>
-          <p class="small">Acesso seguro do gestor</p>
-        </div>
-      </div>
-      <p class="small" style="margin:0 0 18px">Entre com o e-mail e a senha administrativa cadastrados para esta clínica.</p>
+    <div class="modal small-modal">
+      <h2 id="managerLoginTitle">Acesso do gestor</h2>
+      <p class="small" style="margin:8px 0 14px">Entre com a conta administrativa configurada para esta clínica.</p>
       <form id="managerLoginForm">
         <div class="form-group"><label for="managerEmail">E-mail</label><input id="managerEmail" type="email" autocomplete="username" required /></div>
-        <div class="form-group">
-          <label for="managerPassword">Senha</label>
-          <div class="password-field">
-            <input id="managerPassword" type="password" autocomplete="current-password" required />
-            <button id="toggleManagerPassword" class="password-toggle" type="button" aria-controls="managerPassword" aria-label="Mostrar senha">Mostrar</button>
-          </div>
-        </div>
+        <div class="form-group"><label for="managerPassword">Senha</label><input id="managerPassword" type="password" autocomplete="current-password" required /></div>
         <p id="managerLoginError" role="alert" class="small" style="color:var(--danger);min-height:1.2em"></p>
         <div class="actions"><button type="submit" class="btn">Entrar</button></div>
       </form>
-      <p class="small" style="margin-top:14px">Não há senha padrão. Use as credenciais administrativas definidas para o serviço da clínica.</p>
-      <a class="auth-home-link" href="/">← Voltar à página inicial</a>
     </div>
   </div>
 
@@ -1802,15 +1768,6 @@
       renderManagerData();
       showPage('dashboard');
     }
-
-    document.getElementById('toggleManagerPassword').addEventListener('click', event=>{
-      const input = document.getElementById('managerPassword');
-      const button = event.currentTarget;
-      const show = input.type === 'password';
-      input.type = show ? 'text' : 'password';
-      button.textContent = show ? 'Ocultar' : 'Mostrar';
-      button.setAttribute('aria-label', show ? 'Ocultar senha' : 'Mostrar senha');
-    });
 
     document.getElementById('managerLoginForm').addEventListener('submit', async event=>{
       event.preventDefault();
