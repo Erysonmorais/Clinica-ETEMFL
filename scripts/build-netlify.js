@@ -8,6 +8,10 @@ const redirects = '/api/* https://etemfl-backend.onrender.com/api/:splat 200!\n'
 async function build() {
   await mkdir(publishDirectory, { recursive: true });
   await copyFile(path.join(root, 'index.html'), path.join(publishDirectory, 'index.html'));
+  await copyFile(
+    path.join(root, 'Logo Nosyre Tech.png'),
+    path.join(publishDirectory, 'Logo Nosyre Tech.png')
+  );
   await writeFile(path.join(publishDirectory, '_redirects'), redirects);
 
   for (const portal of ['usuario', 'gestor']) {

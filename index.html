@@ -15,9 +15,19 @@
 
     * { box-sizing: border-box; }
     body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; }
-    main { width: min(100%, 760px); }
-    h1 { margin: 0 0 8px; font-size: clamp(1.8rem, 5vw, 2.6rem); }
-    p { color: #52665a; line-height: 1.6; }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: url("./Logo Nosyre Tech.png") center / min(160vw, 160vh) auto no-repeat;
+      background-position: center calc(50% + 40px);
+      opacity: 0.55;
+      pointer-events: none;
+    }
+    main { position: relative; z-index: 1; width: min(100%, 760px); }
+    h1 { margin: 0 0 8px; color: #155724; font-size: clamp(1.8rem, 5vw, 2.6rem); text-align: center; }
+    p { color: #28a745; line-height: 1.6; text-align: center; }
     .portals { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 28px; }
     a { display: block; padding: 24px; border: 1px solid #d5e2d8; border-radius: 16px; background: #fff; color: inherit; text-decoration: none; box-shadow: 0 8px 24px #173b2510; }
     a:hover, a:focus-visible { outline: 3px solid #8abf96; outline-offset: 3px; }
