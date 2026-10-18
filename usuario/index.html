@@ -923,6 +923,7 @@
         localStorage.setItem(LS.SESSION, JSON.stringify({ pacienteId: paciente.id }));
         await refreshPatientData(result);
         connectUserWebSocket();
+        startSyncWorker();
         loadUserSessionAndShowApp();
       } catch (error) {
         alert(error.message || 'Falha ao cadastrar. Verifique a conexão com a clínica e tente novamente.');
@@ -968,6 +969,7 @@
         localStorage.setItem(LS.SESSION, JSON.stringify({ pacienteId: user.id }));
         await refreshPatientData(result);
         connectUserWebSocket();
+        startSyncWorker();
         loadUserSessionAndShowApp();
       } catch (error) {
         alert(error.message || 'Falha ao entrar. Verifique sua conexão.');
