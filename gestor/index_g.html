@@ -1871,6 +1871,8 @@
           }))));
         }
         renderManagerData();
+        const identity = await apiGet('/api/auth/me');
+        if (identity?.type === 'gestor') await activateManager(identity);
       } catch (error) {
         console.error('Falha ao carregar informações públicas do painel:', error);
       }
