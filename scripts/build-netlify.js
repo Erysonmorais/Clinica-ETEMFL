@@ -14,6 +14,11 @@ async function build() {
     await cp(path.join(root, portal), path.join(publishDirectory, portal), { recursive: true });
   }
 
+  await copyFile(
+    path.join(root, 'gestor', 'index_g.html'),
+    path.join(publishDirectory, 'gestor', 'index.html')
+  );
+
   console.log('Publicação Netlify gerada em dist/ com os portais de paciente e gestor.');
 }
 
