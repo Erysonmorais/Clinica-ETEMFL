@@ -293,6 +293,8 @@
       font-size: 0.85rem;
       overflow-x: auto;
     }
+    .site-footer { display:flex; align-items:center; justify-content:center; gap:8px; min-height:64px; padding:8px 12px; color:var(--dark); font-size:0.78rem; text-align:center; }
+    .site-footer img { width:44px; height:44px; object-fit:contain; }
   </style>
 </head>
 <body>
@@ -1699,5 +1701,9 @@
     window.addEventListener('DOMContentLoaded', boot);
     window._userApp = { read, write, LS, genId, getCurrentUser, findAvailabilityForSpecialtyNextWeek };
   </script>
+  <footer class="site-footer">
+    <span>© 2026 Clínica ETEMFL. Todos os direitos reservados.</span>
+    <img src="../Logo Nosyre Tech.png" alt="Nosyre Tech">
+  </footer>
 </body>
 </html>
