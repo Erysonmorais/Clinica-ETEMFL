@@ -67,7 +67,7 @@ Depois que as alterações forem enviadas para `main`, a Netlify publica automat
 - `https://clinica-etemfl.netlify.app/usuario/` — portal do paciente.
 - `https://clinica-etemfl.netlify.app/gestor/` — portal do gestor.
 
-O build gera `dist/_redirects` para encaminhar `/api/*` ao serviço Node.js exclusivo `etemfl-backend.onrender.com` e normalizar as rotas dos portais. Assim, os portais usam a mesma origem Netlify para autenticação por cookie. O serviço Render está ligado ao PostgreSQL exclusivo `etemfl-clinica` no Neon. No acesso pela Netlify, os portais sincronizam os dados autenticados periodicamente; acessando o servidor Render diretamente, o WebSocket permanece disponível.
+O build gera `dist/_redirects` para encaminhar `/api/*` ao serviço Node.js exclusivo `etemfl-backend.onrender.com`. Os diretórios dos portais são servidos diretamente pela Netlify e usam a mesma origem para autenticação por cookie. O serviço Render está ligado ao PostgreSQL exclusivo `etemfl-clinica` no Neon. No acesso pela Netlify, os portais sincronizam os dados autenticados periodicamente; acessando o servidor Render diretamente, o WebSocket permanece disponível.
 
 **Limites importantes:** a API gratuita do Render pode suspender-se por inatividade, e o banco Neon Free pode pausar quando ocioso e está destinado a protótipos/demonstrações. Não há garantia de disponibilidade nem adequação para produção clínica. Não publique dados reais de saúde numa demonstração; use backups e planos adequados antes de qualquer operação clínica.
 
