@@ -1648,10 +1648,6 @@
 
     function showPage(page){
       const pages = ['dashboard','agendamentos','incluir-especialista','especialistas','cadastro-paciente','comunicados','atendimentos-dia','historico-geral','config'];
-      if (page !== 'dashboard' && window._managerIdentity?.type !== 'gestor') {
-        requestManagerLogin(page);
-        return;
-      }
       pages.forEach(p => { const el = document.getElementById(p); if(el) el.style.display = (p === page) ? 'block' : 'none'; });
       document.querySelectorAll('.nav a').forEach(x => x.classList.remove('active'));
       const activeLink = document.querySelector(`.nav a[data-page="${page}"]`);
@@ -1786,7 +1782,13 @@
     }
 
     async function requestManagerLogin(page){
-      if (page) window._managerPendingPage = page;
+      if (page) {
+        window._managerPendingPage = page;
+      } else {
+        const visiblePage = ['dashboard','agendamentos','incluir-especialista','especialistas','cadastro-paciente','comunicados','atendimentos-dia','historico-geral','config']
+          .find(name => document.getElementById(name)?.style.display !== 'none');
+        window._managerPendingPage = visiblePage === 'dashboard' ? null : visiblePage;
+      }
       if (window._managerAccessCheck) return window._managerAccessCheck;
       window._managerAccessCheck = (async () => {
         try {
