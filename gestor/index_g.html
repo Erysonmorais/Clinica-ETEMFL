@@ -93,7 +93,7 @@
 
 </head>
 <body>
-  <div class="app blocked">
+  <div class="app">
     <aside class="sidebar" role="navigation" aria-label="Menu principal">
       <div class="logo">
         <div class="icon" id="brandIcon">G</div>
@@ -412,7 +412,7 @@
     </div>
   </div>
 
-  <div id="managerLogin" class="overlay show" role="dialog" aria-modal="true" aria-labelledby="managerLoginTitle">
+  <div id="managerLogin" class="overlay" role="dialog" aria-modal="true" aria-labelledby="managerLoginTitle">
     <div class="modal small-modal">
       <h2 id="managerLoginTitle">Acesso do gestor</h2>
       <p class="small" style="margin:8px 0 14px">Entre com a conta administrativa configurada para esta clínica.</p>
@@ -427,10 +427,20 @@
 
   <script>
     const originalFetch = window.fetch.bind(window);
-    window.fetch = (resource, options = {}) => {
+    window.fetch = async (resource, options = {}) => {
       const headers = new Headers(options.headers || {});
       headers.set('X-ETEMFL-Portal', 'gestor');
-      return originalFetch(resource, { ...options, headers, credentials: 'same-origin' });
+      const response = await originalFetch(resource, { ...options, headers, credentials: 'same-origin' });
+      const requestUrl = new URL(typeof resource === 'string' ? resource : resource.url, location.href);
+      const method = String(options.method || (typeof resource === 'string' ? 'GET' : resource.method) || 'GET').toUpperCase();
+      const publicGet = method === 'GET' &&
+        ['/api/health', '/api/gestores', '/api/medicos'].includes(requestUrl.pathname);
+      const publicAuthRoute = ['/api/auth/gestor/login', '/api/auth/logout'].includes(requestUrl.pathname);
+      if (response.status === 401 && requestUrl.origin === location.origin &&
+          requestUrl.pathname.startsWith('/api/') && !publicGet && !publicAuthRoute) {
+        requestManagerLogin();
+      }
+      return response;
     };
 
     const LS = {
@@ -1638,6 +1648,10 @@
 
     function showPage(page){
       const pages = ['dashboard','agendamentos','incluir-especialista','especialistas','cadastro-paciente','comunicados','atendimentos-dia','historico-geral','config'];
+      if (page !== 'dashboard' && window._managerIdentity?.type !== 'gestor') {
+        requestManagerLogin(page);
+        return;
+      }
       pages.forEach(p => { const el = document.getElementById(p); if(el) el.style.display = (p === page) ? 'block' : 'none'; });
       document.querySelectorAll('.nav a').forEach(x => x.classList.remove('active'));
       const activeLink = document.querySelector(`.nav a[data-page="${page}"]`);
@@ -1655,7 +1669,7 @@
       document.getElementById('cfgMaster').value = ''; }
     }
 
-    document.querySelectorAll('.nav a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); showPage(a.dataset.page); }));
+    document.querySelectorAll('.nav a[data-page]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); showPage(a.dataset.page); }));
     document.getElementById('btnApplyFilters').addEventListener('click', ()=> {
       const cpf = document.getElementById('filterCPF').value; const sus = document.getElementById('filterSUS').value;
       const ffrom = document.getElementById('filterDateFrom').value; const fto = document.getElementById('filterDateTo').value;
@@ -1766,7 +1780,17 @@
       await loadConfigFromServer();
       initWebSocket();
       renderManagerData();
-      showPage('dashboard');
+      const page = window._managerPendingPage || 'dashboard';
+      window._managerPendingPage = null;
+      showPage(page);
+    }
+
+    function requestManagerLogin(page){
+      if (page) window._managerPendingPage = page;
+      document.querySelector('.app').classList.add('blocked');
+      document.getElementById('managerLoginError').textContent = '';
+      document.getElementById('managerLogin').classList.add('show');
+      document.getElementById('managerEmail').focus();
     }
 
     document.getElementById('managerLoginForm').addEventListener('submit', async event=>{
@@ -1796,8 +1820,10 @@
       if (window._wsGestor) window._wsGestor.close();
       await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
       window._managerIdentity = null;
-      document.querySelector('.app').classList.add('blocked');
-      document.getElementById('managerLogin').classList.add('show');
+      document.querySelector('.app').classList.remove('blocked');
+      document.getElementById('managerLogin').classList.remove('show');
+      window._managerPendingPage = null;
+      showPage('dashboard');
     });
 
     async function boot(){
@@ -1805,7 +1831,32 @@
       populateBairros();
       applyMasks();
       showPage('dashboard');
-      document.getElementById('managerLogin').classList.add('show');
+      renderManagerData();
+      try {
+        const [config, medicos] = await Promise.all([
+          apiGetGestores(),
+          apiGet('/api/medicos')
+        ]);
+        if (config?.length) {
+          const current = JSON.parse(localStorage.getItem(LS.CFG) || '{}');
+          current.nomeClinica = config[0].nome_clinica || current.nomeClinica || '';
+          current.endereco = config[0].endereco || current.endereco || '';
+          current.telefone = config[0].telefone || current.telefone || '';
+          localStorage.setItem(LS.CFG, JSON.stringify(current));
+        }
+        if (Array.isArray(medicos)) {
+          localStorage.setItem(LS.ESP, JSON.stringify(medicos.map(m => ({
+            id: 'db_' + m.id, _dbId: m.id, _synced: true, nome: m.nome || '',
+            especialidade: m.especialidade || '', crm: m.registro_profissional || '',
+            turno: m.turnos.includes('ambos') || m.turnos.length > 1 ? 'ambos' : m.turnos[0],
+            turnos: m.turnos, vagasManha: Number(m.vagas_manha), vagasTarde: Number(m.vagas_tarde),
+            dias: m.dias_atendimento.map(Number), ativo: m.ativo
+          }))));
+        }
+        renderManagerData();
+      } catch (error) {
+        console.error('Falha ao carregar informações públicas do painel:', error);
+      }
     }
     window.addEventListener('DOMContentLoaded', boot);
     window._app = { read, write, LS, genId, generateSlots, findEarliestSlotNextWeek, getAvailabilityForSpecialistOnDate };
