@@ -6,6 +6,12 @@
   NODE_VERSION = "20"
 
 [[redirects]]
+  from = "/api/*"
+  to = "https://etemfl-backend.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/gestor"
   to = "/gestor/"
   status = 301

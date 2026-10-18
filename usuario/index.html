@@ -1583,6 +1583,28 @@
     }
 
     function connectUserWebSocket(){
+      if (location.hostname.endsWith('netlify.app')) {
+        if (window._etemflPatientPoll) return;
+        let syncing = false;
+        window._etemflPatientPoll = setInterval(async () => {
+          if (syncing || !getCurrentUser()) return;
+          syncing = true;
+          try {
+            const session = await apiGet('/api/auth/me');
+            if (session?.type !== 'paciente') return;
+            await refreshPatientData(session);
+            renderVagasPanelForUser();
+            renderMyAppointments();
+            renderComunicadosPage();
+            refreshComunicadosBadge();
+          } catch (error) {
+            console.error('Falha ao sincronizar atualizações do portal:', error);
+          } finally {
+            syncing = false;
+          }
+        }, 15000);
+        return;
+      }
       if (window._wsUsuario && [WebSocket.OPEN, WebSocket.CONNECTING].includes(window._wsUsuario.readyState)) return;
       if (window._wsUsuarioRetry) clearTimeout(window._wsUsuarioRetry);
       try {

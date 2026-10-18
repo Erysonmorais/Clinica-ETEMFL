@@ -1685,6 +1685,23 @@
     document.getElementById('btnLimparHist').addEventListener('click', ()=> { document.getElementById('histTipo').value=''; 
     document.getElementById('histDataInicio').value=''; document.getElementById('histDataFim').value=''; renderHistoricoList(); });
     function initWebSocket(){
+      if (location.hostname.endsWith('netlify.app')) {
+        if (window._etemflManagerPoll) return;
+        let syncing = false;
+        window._etemflManagerPoll = setInterval(async () => {
+          if (syncing || window._managerIdentity?.type !== 'gestor') return;
+          syncing = true;
+          try {
+            await loadConfigFromServer();
+            renderManagerData();
+          } catch (error) {
+            console.error('Falha ao sincronizar atualizações do painel:', error);
+          } finally {
+            syncing = false;
+          }
+        }, 15000);
+        return;
+      }
       if (window._wsGestor && [WebSocket.OPEN, WebSocket.CONNECTING].includes(window._wsGestor.readyState)) return;
       if (window._wsGestorRetry) clearTimeout(window._wsGestorRetry);
       try{

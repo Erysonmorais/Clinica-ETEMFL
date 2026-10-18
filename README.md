@@ -67,7 +67,9 @@ Depois que as alterações forem enviadas para `main`, a Netlify publica automat
 - `https://clinica-etemfl.netlify.app/usuario/` — portal do paciente.
 - `https://clinica-etemfl.netlify.app/gestor/` — portal do gestor.
 
-**Limite de funcionamento atual:** Netlify hospeda os arquivos estáticos, mas não executa este servidor Express/WebSocket de forma persistente nem fornece PostgreSQL. A API precisa permanecer em um serviço Node.js e ser vinculada a um banco PostgreSQL acessível. O serviço Render verificado está falhando ao conectar ao banco; até que API, banco, autenticação entre domínios e comunicação em tempo real sejam validados, os portais podem abrir, mas não se deve cadastrar pacientes nem considerar as gravações funcionais. Não publique dados reais de saúde em uma demonstração.
+O arquivo `netlify.toml` encaminha `/api/*` ao serviço Node.js exclusivo `etemfl-backend.onrender.com`; assim, os portais usam a mesma origem Netlify para autenticação por cookie. O serviço Render está ligado ao PostgreSQL exclusivo `etemfl-clinica` no Neon. No acesso pela Netlify, os portais sincronizam os dados autenticados periodicamente; acessando o servidor Render diretamente, o WebSocket permanece disponível.
+
+**Limites importantes:** a API gratuita do Render pode suspender-se por inatividade, e o banco Neon Free pode pausar quando ocioso e está destinado a protótipos/demonstrações. Não há garantia de disponibilidade nem adequação para produção clínica. Não publique dados reais de saúde numa demonstração; use backups e planos adequados antes de qualquer operação clínica.
 
 ## Publicação de demonstração gratuita no Render
 
